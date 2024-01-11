@@ -1,0 +1,21 @@
+diff -up firefox-52.6.0esr/js/src/vm/Runtime.cpp.disable-extra-threads firefox-52.6.0esr/js/src/vm/Runtime.cpp
+--- firefox-52.6.0esr/js/src/vm/Runtime.cpp.disable-extra-threads	2018-02-08 10:16:13.453828939 -0500
++++ firefox-52.6.0esr/js/src/vm/Runtime.cpp	2018-02-08 10:23:31.283458826 -0500
+@@ -283,6 +283,17 @@ JSRuntime::init(uint32_t maxbytes, uint3
+     ownerThreadNative_ = (size_t)pthread_self();
+ #endif
+ 
++    const char* enable_js_helper_threads;
++    enable_js_helper_threads = getenv("GJS_ENABLE_JS_HELPER_THREADS");
++
++#if defined(__PPC64__) && defined (__LITTLE_ENDIAN__)
++    if (enable_js_helper_threads == NULL)
++        js::DisableExtraThreads();
++#endif
++
++    if (enable_js_helper_threads != NULL && enable_js_helper_threads[0] == '0')
++        js::DisableExtraThreads();
++
+     if (!mainThread.init())
+         return false;
+ 
